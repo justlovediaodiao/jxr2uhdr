@@ -1,6 +1,6 @@
 # JXR to Ultra HDR
 
-A small Windows desktop wrapper for [`jxr2uhdr-cli`](https://github.com/tfx2001/jxr2uhdr), used to convert JXR images to Ultra HDR JPEG.
+A small desktop wrapper for [`jxr2uhdr`](https://github.com/tfx2001/jxr2uhdr), used to convert JXR images to Ultra HDR JPEG.
 
 ## Features
 
@@ -11,7 +11,7 @@ A small Windows desktop wrapper for [`jxr2uhdr-cli`](https://github.com/tfx2001/
 ## Build
 
 - .NET 10 SDK
-- `lib/jxr2uhdr-cli` executable, downloaded from the [jxr2uhdr releases](https://github.com/tfx2001/jxr2uhdr/releases) page
+- `lib/jxr2uhdr-*` executable, downloaded from the [jxr2uhdr releases](https://github.com/tfx2001/jxr2uhdr/releases) page
 - Run:
 
 ```bash
