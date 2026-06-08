@@ -5,7 +5,7 @@ A small desktop wrapper for [`jxr2uhdr`](https://github.com/tfx2001/jxr2uhdr), u
 ## Features
 
 - Select Windows HDR screenshots in `.jxr` format
-- Convert to Android Ultra HDR JPEG images with good compatibility
+- Convert to Ultra HDR JPEG images with good compatibility
 - Save output next to the source file as `*_utralhdr.jpg`
 
 ## Build

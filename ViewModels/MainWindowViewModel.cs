@@ -127,7 +127,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        var cliPath = Path.Combine(AppContext.BaseDirectory, "jxr2uhdr-cli");
+        var cliPath = Path.Combine(AppContext.BaseDirectory, GetCliFileName());
         if (!File.Exists(cliPath))
         {
             Summary = BuildFailureSummary(items.Count, 0, items.Count);
@@ -180,6 +180,11 @@ public partial class MainWindowViewModel : ObservableObject
     private bool CanConvert()
     {
         return State != ConversionState.Converting && _files.Count > 0;
+    }
+
+    private static string GetCliFileName()
+    {
+        return OperatingSystem.IsWindows() ? "jxr2uhdr-cli.exe" : "jxr2uhdr-cli";
     }
 
     private bool CanEditFiles()
