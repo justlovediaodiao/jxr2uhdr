@@ -1,0 +1,174 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="using:Avalonia.Data.Converters"
+        xmlns:vm="using:jxr2uhdr.ViewModels"
+        mc:Ignorable="d"
+        d:DesignWidth="360"
+        d:DesignHeight="260"
+        x:Class="jxr2uhdr.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="JXR to Ultra HDR"
+        Icon="/Assets/app-icon.ico"
+        Width="360"
+        Height="260"
+        MinWidth="360"
+        MinHeight="260"
+        MaxWidth="360"
+        MaxHeight="260"
+        Background="#E5E7EB">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Border HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Width="320"
+            Padding="22"
+            Background="#FFFFFF"
+            CornerRadius="12"
+            BoxShadow="0 4 16 0 #15000000">
+        <Grid RowDefinitions="Auto,92,Auto"
+              RowSpacing="18">
+            <TextBlock Grid.Row="0"
+                       Text="JXR to Ultra HDR"
+                       FontSize="21"
+                       FontWeight="SemiBold"
+                       Foreground="#101828"/>
+
+            <Grid Grid.Row="1">
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      ColumnSpacing="10"
+                      VerticalAlignment="Center"
+                      IsVisible="{Binding Summary, Converter={x:Static converters:StringConverters.IsNullOrEmpty}}">
+                    <TextBlock Text="Quality"
+                               VerticalAlignment="Center"
+                               Foreground="#475467"/>
+                    <Slider Grid.Column="1"
+                            Minimum="1"
+                            Maximum="100"
+                            Value="{Binding Quality}"
+                            TickFrequency="1"
+                            IsSnapToTickEnabled="True"
+                            IsEnabled="{Binding State, Converter={x:Static converters:ObjectConverters.NotEqual}, ConverterParameter={x:Static vm:ConversionState.Converting}}"
+                            Width="150"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding QualityText}"
+                               Width="28"
+                               Foreground="#344054"
+                               VerticalAlignment="Center"/>
+                </Grid>
+
+                <Grid RowDefinitions="26,Auto"
+                      RowSpacing="12"
+                      VerticalAlignment="Center"
+                      IsVisible="{Binding Summary, Converter={x:Static converters:StringConverters.IsNotNullOrEmpty}}">
+                    <Border Height="26"
+                            CornerRadius="6"
+                            ClipToBounds="True">
+                        <Grid>
+                            <Border HorizontalAlignment="Left"
+                                    Width="{Binding StatusProgressWidth}"
+                                    Background="#D6E8FF"
+                                    IsVisible="{Binding ShowStatusProgress}"/>
+
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="8"
+                                  Margin="10,0">
+                                <Panel Width="18"
+                                       Height="18"
+                                       VerticalAlignment="Center"
+                                       IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Pending}}">
+                                    <Ellipse Width="14"
+                                             Height="14"
+                                          Stroke="#8A8A8A"
+                                          StrokeThickness="2"
+                                             Fill="Transparent"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                                    <Path Data="M 9,9 L 9,2 A 7,7 0 0 0 2,9 Z"
+                                          Fill="#8A8A8A"/>
+                                </Panel>
+
+                                <Panel Width="18"
+                                       Height="18"
+                                       VerticalAlignment="Center">
+                                    <Path Data="M 5,5 L 13,13 M 13,5 L 5,13"
+                                          Stroke="#D13438"
+                                          StrokeThickness="2"
+                                          StrokeLineCap="Round"
+                                          Fill="Transparent"
+                                          IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Error}}"/>
+                                    <Path Data="M 3,9 L 7,13 L 15,5"
+                                          Stroke="#16A34A"
+                                          StrokeThickness="2.4"
+                                          StrokeLineCap="Round"
+                                          Fill="Transparent"
+                                          IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Done}}"/>
+                                    <Path Data="M 9,2 A 7,7 0 1 1 4.05,4.05"
+                                          Stroke="#D9A300"
+                                          StrokeThickness="2"
+                                          StrokeLineCap="Round"
+                                          Fill="Transparent"
+                                          IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Converting}}"
+                                          RenderTransformOrigin="50%,50%">
+                                        <Path.RenderTransform>
+                                            <RotateTransform Angle="{Binding SpinnerAngle}"/>
+                                        </Path.RenderTransform>
+                                    </Path>
+                                </Panel>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Summary}"
+                                           VerticalAlignment="Center"
+                                           Foreground="#344054"
+                                           TextWrapping="NoWrap"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="10">
+                        <TextBlock Text="Quality"
+                                   VerticalAlignment="Center"
+                                   Foreground="#475467"/>
+                        <Slider Grid.Column="1"
+                                Minimum="1"
+                                Maximum="100"
+                                Value="{Binding Quality}"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                IsEnabled="{Binding State, Converter={x:Static converters:ObjectConverters.NotEqual}, ConverterParameter={x:Static vm:ConversionState.Converting}}"
+                                Width="150"
+                                VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding QualityText}"
+                                   Width="28"
+                                   Foreground="#344054"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Content="Select"
+                        Command="{Binding AddFilesCommand}"
+                        CommandParameter="{Binding $parent[Window].StorageProvider}"
+                        IsEnabled="{Binding State, Converter={x:Static converters:ObjectConverters.NotEqual}, ConverterParameter={x:Static vm:ConversionState.Converting}}"
+                        HorizontalAlignment="Stretch"
+                        Classes="accent"/>
+                <Button Grid.Column="1"
+                        Content="Convert"
+                        Command="{Binding ConvertCommand}"
+                        IsEnabled="{Binding State, Converter={x:Static converters:ObjectConverters.NotEqual}, ConverterParameter={x:Static vm:ConversionState.Converting}}"
+                        HorizontalAlignment="Stretch"
+                        Classes="success"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

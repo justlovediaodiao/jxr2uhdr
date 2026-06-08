@@ -1,0 +1,51 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="jxr2uhdr.App"
+             RequestedThemeVariant="Default">
+    <Application.Styles>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Light" Accent="#FF0078D4" AltHigh="#FFF2F2F2" AltLow="#FFF2F2F2" AltMedium="#FFF2F2F2" AltMediumHigh="#FFF2F2F2" AltMediumLow="#FFF2F2F2" BaseHigh="#FF000000" BaseLow="#FFC2C2C2" BaseMedium="#FF898989" BaseMediumHigh="#FF5D5D5D" BaseMediumLow="#FF737373" ChromeAltLow="#FF5D5D5D" ChromeBlackHigh="#FF000000" ChromeBlackLow="#FFC2C2C2" ChromeBlackMedium="#FF5D5D5D" ChromeBlackMediumLow="#FF898989" ChromeDisabledHigh="#FFC2C2C2" ChromeDisabledLow="#FF898989" ChromeGray="#FF737373" ChromeHigh="#FFC2C2C2" ChromeLow="#FFF2F2F2" ChromeMedium="#FFF2F2F2" ChromeMediumLow="#FFF2F2F2" ChromeWhite="#FFFFFFFF" ListLow="#FFF2F2F2" ListMedium="#FFC2C2C2" RegionColor="#FFF2F2F2" />
+                <ColorPaletteResources x:Key="Dark" Accent="#FF0078D4" AltHigh="#FF1A1A1A" AltLow="#FF1A1A1A" AltMedium="#FF1A1A1A" AltMediumHigh="#FF1A1A1A" AltMediumLow="#FF1A1A1A" BaseHigh="#FFFFFFFF" BaseLow="#FF2B2B2B" BaseMedium="#FF9B9B9B" BaseMediumHigh="#FFB3B3B3" BaseMediumLow="#FF7A7A7A" ChromeAltLow="#FFB3B3B3" ChromeBlackHigh="#FF000000" ChromeBlackLow="#FF2B2B2B" ChromeBlackMedium="#FF1A1A1A" ChromeBlackMediumLow="#FF5D5D5D" ChromeDisabledHigh="#FF2B2B2B" ChromeDisabledLow="#FF9B9B9B" ChromeGray="#FF5D5D5D" ChromeHigh="#FF2B2B2B" ChromeLow="#FF171717" ChromeMedium="#FF1A1A1A" ChromeMediumLow="#FF2B2B2B" ChromeWhite="#FFFFFFFF" ListLow="#FF1A1A1A" ListMedium="#FF2B2B2B" RegionColor="#FF1A1A1A" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+
+        <Style>
+            <Style.Resources>
+                <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="{DynamicResource RegionColor}" Opacity="0.95" />
+                <SolidColorBrush x:Key="ControlFillColorSecondaryBrush" Color="{DynamicResource BaseLow}" Opacity="0.45" />
+            </Style.Resources>
+        </Style>
+
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="18,9"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#0078D4"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#006CBE"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.success">
+            <Setter Property="Background" Value="#2E7D32"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.success:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#276B2B"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+    </Application.Styles>
+</Application>
