@@ -130,49 +130,60 @@ public partial class MainWindowViewModel : ObservableObject
         var cliPath = Path.Combine(AppContext.BaseDirectory, GetCliFileName());
         if (!File.Exists(cliPath))
         {
-            Summary = BuildFailureSummary(items.Count, 0, items.Count);
+            Summary = BuildFailureSummary(items.Count, 0);
             State = ConversionState.Error;
             return;
         }
 
         State = ConversionState.Converting;
         Progress = 0;
+        var quality = Math.Clamp((int)Math.Round(Quality), 1, 100);
+        var maxParallelism = Math.Min(GetMaxParallelism(items.Count), items.Count);
         var completed = 0;
         var succeeded = 0;
-        var failed = 0;
 
-        try
+        if (maxParallelism == 1)
         {
             foreach (var item in items)
             {
-                var exitCode = await RunCliAsync(cliPath, item.FullPath, item.OutputPath);
-                completed++;
-                Progress = completed * 100d / items.Count;
-
-                if (exitCode == 0 && File.Exists(item.OutputPath))
+                if (await ConvertItemAsync(cliPath, item, quality))
                 {
                     succeeded++;
                 }
-                else
-                {
-                    failed++;
-                }
-            }
 
-            if (failed == 0)
-            {
-                State = ConversionState.Done;
-            }
-            else
-            {
-                Summary = BuildFailureSummary(items.Count, succeeded, failed);
-                State = ConversionState.Error;
+                completed++;
+                Progress = completed * 100d / items.Count;
             }
         }
-        catch
+        else
         {
-            failed += items.Count - succeeded;
-            Summary = BuildFailureSummary(items.Count, succeeded, failed);
+            using var semaphore = new SemaphoreSlim(maxParallelism);
+            var tasks = items
+                .Select(item => ConvertItemWithLimitAsync(semaphore, cliPath, item, quality))
+                .ToList();
+
+            while (tasks.Count > 0)
+            {
+                var finishedTask = await Task.WhenAny(tasks);
+                tasks.Remove(finishedTask);
+
+                if (await finishedTask)
+                {
+                    succeeded++;
+                }
+
+                completed++;
+                Progress = completed * 100d / items.Count;
+            }
+        }
+
+        if (succeeded == items.Count)
+        {
+            State = ConversionState.Done;
+        }
+        else
+        {
+            Summary = BuildFailureSummary(items.Count, succeeded);
             State = ConversionState.Error;
         }
     }
@@ -185,6 +196,26 @@ public partial class MainWindowViewModel : ObservableObject
     private static string GetCliFileName()
     {
         return OperatingSystem.IsWindows() ? "jxr2uhdr-cli.exe" : "jxr2uhdr-cli";
+    }
+
+    private static int GetMaxParallelism(int itemCount)
+    {
+        if (itemCount >= 32)
+        {
+            return Math.Max(8, Environment.ProcessorCount);
+        }
+
+        if (itemCount >= 16)
+        {
+            return Math.Max(4, Environment.ProcessorCount);
+        }
+
+        if (itemCount >= 8)
+        {
+            return Math.Max(2, Environment.ProcessorCount);
+        }
+
+        return 1;
     }
 
     private bool CanEditFiles()
@@ -212,11 +243,11 @@ public partial class MainWindowViewModel : ObservableObject
         };
     }
 
-    private static string BuildFailureSummary(int total, int succeeded, int failed)
+    private static string BuildFailureSummary(int total, int succeeded)
     {
         return total == 1
             ? "Failed"
-            : $"{succeeded} OK, {failed} Failed";
+            : $"{succeeded} OK, {total - succeeded} Failed";
     }
 
     private string CreateOutputPath(string inputPath)
@@ -226,7 +257,38 @@ public partial class MainWindowViewModel : ObservableObject
         return Path.Combine(directory, $"{fileName}_utralhdr.jpg");
     }
 
-    private async Task<int> RunCliAsync(string cliPath, string inputPath, string outputPath)
+    private static async Task<bool> ConvertItemAsync(string cliPath, FileItemViewModel item, int quality)
+    {
+        try
+        {
+            var exitCode = await RunCliAsync(cliPath, item.FullPath, item.OutputPath, quality);
+            return exitCode == 0 && File.Exists(item.OutputPath);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static async Task<bool> ConvertItemWithLimitAsync(
+        SemaphoreSlim semaphore,
+        string cliPath,
+        FileItemViewModel item,
+        int quality)
+    {
+        await semaphore.WaitAsync();
+
+        try
+        {
+            return await ConvertItemAsync(cliPath, item, quality);
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    private static async Task<int> RunCliAsync(string cliPath, string inputPath, string outputPath, int quality)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -240,7 +302,7 @@ public partial class MainWindowViewModel : ObservableObject
         startInfo.ArgumentList.Add("--output");
         startInfo.ArgumentList.Add(outputPath);
         startInfo.ArgumentList.Add("--quality");
-        startInfo.ArgumentList.Add(Math.Clamp((int)Math.Round(Quality), 1, 100).ToString());
+        startInfo.ArgumentList.Add(quality.ToString());
 
         using var process = new Process { StartInfo = startInfo };
         process.Start();

@@ -6,6 +6,7 @@ A small desktop wrapper for [`jxr2uhdr`](https://github.com/tfx2001/jxr2uhdr), u
 
 - Select Windows HDR screenshots in `.jxr` format
 - Convert to Ultra HDR JPEG images with good compatibility
+- Process multiple images in parallel
 - Save output next to the source file as `*_utralhdr.jpg`
 
 ## Build
