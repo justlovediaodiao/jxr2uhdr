@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Avalonia.Threading;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -16,6 +16,8 @@ public enum ConversionState
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    private static readonly string[] SdrImageExtensions = [".png", ".jpg", ".jpeg"];
+
     private readonly List<FileItemViewModel> _files = [];
     private readonly DispatcherTimer _spinnerTimer;
 
@@ -29,7 +31,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private double _quality = 90;
+    private double _quality = 95;
 
     [ObservableProperty]
     private double _progress;
@@ -127,14 +129,6 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        var cliPath = Path.Combine(AppContext.BaseDirectory, GetCliFileName());
-        if (!File.Exists(cliPath))
-        {
-            Summary = BuildFailureSummary(items.Count, 0);
-            State = ConversionState.Error;
-            return;
-        }
-
         State = ConversionState.Converting;
         Progress = 0;
         var quality = Math.Clamp((int)Math.Round(Quality), 1, 100);
@@ -146,7 +140,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             foreach (var item in items)
             {
-                if (await ConvertItemAsync(cliPath, item, quality))
+                if (await ConvertItemAsync(item, quality))
                 {
                     succeeded++;
                 }
@@ -159,7 +153,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             using var semaphore = new SemaphoreSlim(maxParallelism);
             var tasks = items
-                .Select(item => ConvertItemWithLimitAsync(semaphore, cliPath, item, quality))
+                .Select(item => ConvertItemWithLimitAsync(semaphore, item, quality))
                 .ToList();
 
             while (tasks.Count > 0)
@@ -193,29 +187,23 @@ public partial class MainWindowViewModel : ObservableObject
         return State != ConversionState.Converting && _files.Count > 0;
     }
 
-    private static string GetCliFileName()
-    {
-        return OperatingSystem.IsWindows() ? "jxr2uhdr-cli.exe" : "jxr2uhdr-cli";
-    }
-
     private static int GetMaxParallelism(int itemCount)
     {
-        if (itemCount >= 32)
+        // libjxr2uhdr already uses up to 4 worker threads per image, so the
+        // outer batch parallelism should stay conservative and scale only for
+        // larger batches.
+        var cpuCount = Math.Max(1, Environment.ProcessorCount);
+        var maxThreads = Math.Min(16, cpuCount);
+        var threadsPerImage = Math.Min(4, cpuCount);
+        var resourceLimit = Math.Max(1, maxThreads / threadsPerImage);
+        var countLimit = itemCount switch
         {
-            return Math.Max(8, Environment.ProcessorCount);
-        }
+            >= 32 => 4,
+            >= 16 => 2,
+            _ => 1
+        };
 
-        if (itemCount >= 16)
-        {
-            return Math.Max(4, Environment.ProcessorCount);
-        }
-
-        if (itemCount >= 8)
-        {
-            return Math.Max(2, Environment.ProcessorCount);
-        }
-
-        return 1;
+        return Math.Min(resourceLimit, countLimit);
     }
 
     private bool CanEditFiles()
@@ -225,12 +213,12 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void AddFile(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath) || _files.Any(file => file.FullPath == filePath))
+        if (string.IsNullOrWhiteSpace(filePath) || _files.Any(file => file.HdrPath == filePath))
         {
             return;
         }
 
-        _files.Add(new FileItemViewModel(filePath, CreateOutputPath(filePath)));
+        _files.Add(new FileItemViewModel(filePath, CreateOutputPath(filePath), FindSdrPath(filePath)));
     }
 
     private string BuildSelectionSummary()
@@ -257,12 +245,34 @@ public partial class MainWindowViewModel : ObservableObject
         return Path.Combine(directory, $"{fileName}_utralhdr.jpg");
     }
 
-    private static async Task<bool> ConvertItemAsync(string cliPath, FileItemViewModel item, int quality)
+    private static string? FindSdrPath(string hdrPath)
+    {
+        var directory = Path.GetDirectoryName(hdrPath) ?? string.Empty;
+        var fileName = Path.GetFileNameWithoutExtension(hdrPath);
+
+        foreach (var extension in SdrImageExtensions)
+        {
+            var candidate = Path.Combine(directory, $"{fileName}{extension}");
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private static async Task<bool> ConvertItemAsync(FileItemViewModel item, int quality)
     {
         try
         {
-            var exitCode = await RunCliAsync(cliPath, item.FullPath, item.OutputPath, quality);
-            return exitCode == 0 && File.Exists(item.OutputPath);
+            var result = await Task.Run(() => NativeMethods.Convert(
+                item.HdrPath,
+                item.SdrPath,
+                quality,
+                item.OutputPath));
+
+            return result == 0;
         }
         catch
         {
@@ -272,7 +282,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     private static async Task<bool> ConvertItemWithLimitAsync(
         SemaphoreSlim semaphore,
-        string cliPath,
         FileItemViewModel item,
         int quality)
     {
@@ -280,7 +289,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            return await ConvertItemAsync(cliPath, item, quality);
+            return await ConvertItemAsync(item, quality);
         }
         finally
         {
@@ -288,27 +297,13 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    private static async Task<int> RunCliAsync(string cliPath, string inputPath, string outputPath, int quality)
+    private static partial class NativeMethods
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = cliPath,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        startInfo.ArgumentList.Add("--input");
-        startInfo.ArgumentList.Add(inputPath);
-        startInfo.ArgumentList.Add("--output");
-        startInfo.ArgumentList.Add(outputPath);
-        startInfo.ArgumentList.Add("--quality");
-        startInfo.ArgumentList.Add(quality.ToString());
-
-        using var process = new Process { StartInfo = startInfo };
-        process.Start();
-
-        await process.WaitForExitAsync();
-
-        return process.ExitCode;
+        [LibraryImport("jxr2uhdr", EntryPoint = "jxr2uhdr_convert", StringMarshalling = StringMarshalling.Utf8)]
+        internal static partial int Convert(
+            string jxrPath,
+            string? sdrImagePath,
+            int quality,
+            string outJpgPath);
     }
 }

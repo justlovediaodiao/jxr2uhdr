@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PublishAot>true</PublishAot>
     <ApplicationIcon>Assets/app-icon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -19,17 +20,10 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets/app-icon.ico" />
-    <None Include="lib/jxr2uhdr-aarch64-apple-darwin"
-          Condition="'$(RuntimeIdentifier)' == 'osx-arm64' Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('OSX')))"
+    <None Include="native/win-x64/jxr2uhdr.dll"
+          Condition="Exists('native/win-x64/jxr2uhdr.dll') And ('$(RuntimeIdentifier)' == 'win-x64' Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('Windows'))))"
           CopyToOutputDirectory="PreserveNewest"
-          TargetPath="jxr2uhdr-cli" />
-    <None Include="lib/jxr2uhdr-x86_64-pc-windows-msvc.exe"
-          Condition="'$(RuntimeIdentifier)' == 'win-x64' Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('Windows')))"
-          CopyToOutputDirectory="PreserveNewest"
-          TargetPath="jxr2uhdr-cli.exe" />
-    <None Include="lib/jxr2uhdr-x86_64-unknown-linux-gnu"
-          Condition="'$(RuntimeIdentifier)' == 'linux-x64' Or ('$(RuntimeIdentifier)' == '' And $([MSBuild]::IsOSPlatform('Linux')))"
-          CopyToOutputDirectory="PreserveNewest"
-          TargetPath="jxr2uhdr-cli" />
+          CopyToPublishDirectory="PreserveNewest"
+          TargetPath="jxr2uhdr.dll" />
   </ItemGroup>
 </Project>

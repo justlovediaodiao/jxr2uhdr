@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    name: Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Download libjxr2uhdr
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: justlovediaodiao/libjxr2uhdr
+          latest: true
+          fileName: libjxr2uhdr-windows-x64.zip
+          out-file-path: native/win-x64
+          extract: true
+          extract-path: native/win-x64
+
+      - name: Publish
+        run: dotnet publish -r win-x64  -o publish/win-x64
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          $version = '${{ github.ref_name }}'
+          $zipPath = "artifacts/jxr2uhdr-$version-win-x64.zip"
+
+          Compress-Archive -Path publish/win-x64/* -DestinationPath $zipPath -Force
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.zip
+          fail_on_unmatched_files: true
