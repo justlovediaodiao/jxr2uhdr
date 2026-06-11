@@ -44,6 +44,8 @@ jobs:
           $version = '${{ github.ref_name }}'
           $zipPath = "artifacts/jxr2uhdr-$version-win-x64.zip"
 
+          Get-ChildItem publish/win-x64 -Recurse -Force -Filter *.pdb | Remove-Item -Force
+
           Compress-Archive -Path publish/win-x64/* -DestinationPath $zipPath -Force
 
       - name: Create release

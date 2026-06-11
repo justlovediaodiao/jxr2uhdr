@@ -17,7 +17,7 @@ A small desktop app for converting JXR images to Ultra HDR JPEG with [`libjxr2uh
 - Run:
 
 ```bash
-dotnet publish -c Release -r win-x64 --self-contained true
+dotnet publish -r win-x64
 ```
 
 ## Release
