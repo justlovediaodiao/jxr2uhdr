@@ -1,3 +1,7 @@
 bin
 obj
+build
+publish
+artifacts
+package
 native/win-x64/jxr2uhdr.dll

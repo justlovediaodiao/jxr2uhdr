@@ -1,6 +1,7 @@
-name: Release
+name: Build and release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -9,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  release-windows:
+  build-windows:
     name: Windows x64
     runs-on: windows-latest
 
@@ -17,38 +18,54 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
+      - name: Configure native library
+        run: >
+          cmake -S libjxr2uhdr -B build/libjxr2uhdr
+          -A x64
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
+
+      - name: Build native library
+        run: cmake --build build/libjxr2uhdr --config Release --target jxr2uhdr
+
+      - name: Package native library
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          New-Item -ItemType Directory -Force artifacts, package/libjxr2uhdr, native/win-x64 | Out-Null
+          Copy-Item build/libjxr2uhdr/Release/jxr2uhdr.dll native/win-x64/
+          Copy-Item build/libjxr2uhdr/Release/jxr2uhdr.dll package/libjxr2uhdr/
+          Copy-Item libjxr2uhdr/include/jxr2uhdr.h package/libjxr2uhdr/
+          Copy-Item libjxr2uhdr/LICENSE package/libjxr2uhdr/
+          Compress-Archive -Path package/libjxr2uhdr/* -DestinationPath artifacts/libjxr2uhdr-windows-x64.zip -Force
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Download libjxr2uhdr
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: justlovediaodiao/libjxr2uhdr
-          latest: true
-          fileName: libjxr2uhdr-windows-x64.zip
-          out-file-path: native/win-x64
-          extract: true
-          extract-path: native/win-x64
+      - name: Publish app
+        run: dotnet publish -r win-x64 -o publish/win-x64
 
-      - name: Publish
-        run: dotnet publish -r win-x64  -o publish/win-x64
-
-      - name: Package
+      - name: Package app
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
 
-          New-Item -ItemType Directory -Force artifacts | Out-Null
-          $version = '${{ github.ref_name }}'
-          $zipPath = "artifacts/jxr2uhdr-$version-win-x64.zip"
-
+          $version = '${{ github.ref_name }}' -replace '[^A-Za-z0-9._-]', '-'
           Get-ChildItem publish/win-x64 -Recurse -Force -Filter *.pdb | Remove-Item -Force
+          Compress-Archive -Path publish/win-x64/* -DestinationPath "artifacts/jxr2uhdr-$version-win-x64.zip" -Force
 
-          Compress-Archive -Path publish/win-x64/* -DestinationPath $zipPath -Force
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: artifacts/*.zip
+          if-no-files-found: error
 
       - name: Create release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/*.zip

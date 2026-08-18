@@ -1,0 +1,7 @@
+{
+  "name": "libjxr2uhdr",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "libjpeg-turbo"
+  ]
+}
