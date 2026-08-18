@@ -1,10 +1,10 @@
 # JXR to Ultra HDR
 
-A Windows desktop app for converting JPEG XR images to Ultra HDR JPEGs. The repository includes the native [`libjxr2uhdr`](libjxr2uhdr) library used by the app, so both components can be built and released together.
+A Windows desktop app for converting JPEG XR images to Ultra HDR JPEGs. The repository includes the native [`libjxr2uhdr`](libjxr2uhdr) library used by the app.
 
 ## Features
 
-- Select Windows HDR screenshots in `.jxr` or `.wdp` format
+- Select Windows HDR screenshots in `.jxr` format
 - Convert to Ultra HDR JPEG images with good compatibility
 - Automatically use a same-name `.png`, `.jpg`, or `.jpeg` SDR image next to the JXR file when present
 - Process multiple images in parallel
@@ -14,7 +14,6 @@ A Windows desktop app for converting JPEG XR images to Ultra HDR JPEGs. The repo
 
 - `libjxr2uhdr/` — native Windows x64 DLL and its public C API
 - `jxr2uhdr.csproj` — Avalonia desktop app
-- `native/win-x64/` — local location from which the app build copies `jxr2uhdr.dll`
 
 ## Build
 
