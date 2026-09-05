@@ -28,17 +28,13 @@ jobs:
       - name: Build native library
         run: cmake --build build/libjxr2uhdr --config Release --target jxr2uhdr
 
-      - name: Package native library
+      - name: Stage native library
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
 
-          New-Item -ItemType Directory -Force artifacts, package/libjxr2uhdr, native/win-x64 | Out-Null
+          New-Item -ItemType Directory -Force native/win-x64 | Out-Null
           Copy-Item build/libjxr2uhdr/Release/jxr2uhdr.dll native/win-x64/
-          Copy-Item build/libjxr2uhdr/Release/jxr2uhdr.dll package/libjxr2uhdr/
-          Copy-Item libjxr2uhdr/include/jxr2uhdr.h package/libjxr2uhdr/
-          Copy-Item libjxr2uhdr/LICENSE package/libjxr2uhdr/
-          Compress-Archive -Path package/libjxr2uhdr/* -DestinationPath artifacts/libjxr2uhdr-windows-x64.zip -Force
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -55,18 +51,19 @@ jobs:
 
           $version = '${{ github.ref_name }}' -replace '[^A-Za-z0-9._-]', '-'
           Get-ChildItem publish/win-x64 -Recurse -Force -Filter *.pdb | Remove-Item -Force
+          New-Item -ItemType Directory -Force artifacts | Out-Null
           Compress-Archive -Path publish/win-x64/* -DestinationPath "artifacts/jxr2uhdr-$version-win-x64.zip" -Force
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-x64
-          path: artifacts/*.zip
+          path: publish/win-x64/
           if-no-files-found: error
 
       - name: Create release
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*.zip
+          files: artifacts/jxr2uhdr-*-win-x64.zip
           fail_on_unmatched_files: true
