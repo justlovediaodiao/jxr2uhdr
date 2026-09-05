@@ -8,7 +8,7 @@ A Windows desktop app for converting JPEG XR images to Ultra HDR JPEGs. The repo
 - Convert to Ultra HDR JPEG images with good compatibility
 - Automatically use a same-name `.png`, `.jpg`, or `.jpeg` SDR image next to the JXR file when present
 - Process multiple images in parallel
-- Save output next to the source file as `*_utralhdr.jpg`
+- Save output next to the source file as `*_utralhdr.jpg`, or choose one output directory for the batch
 
 ## Repository layout
 

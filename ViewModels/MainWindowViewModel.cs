@@ -43,9 +43,20 @@ public partial class MainWindowViewModel : ObservableObject
     private string _summary = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOutputDirectory))]
+    [NotifyPropertyChangedFor(nameof(OutputDirectoryTip))]
+    private string? _outputDirectory;
+
+    [ObservableProperty]
     private ConversionState _state = ConversionState.Pending;
 
     public bool ShowStatusProgress => Progress > 0;
+
+    public bool HasOutputDirectory => OutputDirectory is not null;
+
+    public string OutputDirectoryTip => OutputDirectory is null
+        ? "Select output directory"
+        : OutputDirectory;
 
     public double StatusProgressWidth => Math.Clamp(Progress / 100d, 0, 1) * 278d;
 
@@ -65,6 +76,7 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnStateChanged(ConversionState oldValue, ConversionState newValue)
     {
         AddFilesCommand.NotifyCanExecuteChanged();
+        ChooseOutputDirectoryCommand.NotifyCanExecuteChanged();
         ConvertCommand.NotifyCanExecuteChanged();
 
         if (newValue == ConversionState.Converting)
@@ -103,6 +115,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        OutputDirectory = null;
         _files.Clear();
         Progress = 0;
         State = ConversionState.Pending;
@@ -118,6 +131,35 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         ConvertCommand.NotifyCanExecuteChanged();
+        ChooseOutputDirectoryCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanChooseOutputDirectory))]
+    private async Task ChooseOutputDirectory(IStorageProvider storageProvider)
+    {
+        var pickedFolders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = "Select Output Directory"
+        });
+
+        if (pickedFolders.Count == 0)
+        {
+            return;
+        }
+
+        var directory = pickedFolders[0].Path.LocalPath;
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return;
+        }
+
+        foreach (var file in _files)
+        {
+            file.OutputPath = Path.Combine(directory, Path.GetFileName(file.OutputPath));
+        }
+
+        OutputDirectory = directory;
     }
 
     [RelayCommand(CanExecute = nameof(CanConvert))]
@@ -187,6 +229,11 @@ public partial class MainWindowViewModel : ObservableObject
         return State != ConversionState.Converting && _files.Count > 0;
     }
 
+    private bool CanChooseOutputDirectory()
+    {
+        return CanEditFiles() && _files.Count > 0;
+    }
+
     private static int GetMaxParallelism(int itemCount)
     {
         // libjxr2uhdr already uses up to 4 worker threads per image, so the
@@ -238,7 +285,7 @@ public partial class MainWindowViewModel : ObservableObject
             : $"{succeeded} OK, {total - succeeded} Failed";
     }
 
-    private string CreateOutputPath(string inputPath)
+    private static string CreateOutputPath(string inputPath)
     {
         var directory = Path.GetDirectoryName(inputPath) ?? string.Empty;
         var fileName = Path.GetFileNameWithoutExtension(inputPath);

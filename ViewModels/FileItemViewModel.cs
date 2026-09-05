@@ -6,7 +6,7 @@ public sealed class FileItemViewModel(string hdrPath, string outputPath, string?
 
     public string OriginalName { get; } = Path.GetFileName(hdrPath);
 
-    public string OutputPath { get; } = outputPath;
+    public string OutputPath { get; internal set; } = outputPath;
 
     public string? SdrPath { get; } = sdrPath;
 }
