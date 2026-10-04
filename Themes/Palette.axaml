@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="WindowBackgroundBrush">#E5E7EB</SolidColorBrush>
+            <SolidColorBrush x:Key="CardBackgroundBrush">#FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryTextBrush">#101828</SolidColorBrush>
+            <SolidColorBrush x:Key="SecondaryTextBrush">#475467</SolidColorBrush>
+            <SolidColorBrush x:Key="BodyTextBrush">#344054</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderIconBrush">#667085</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderHoverBrush">#F2F4F7</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedBrush">#E8F3FC</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedBorderBrush">#84CAFF</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedForegroundBrush">#0078D4</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedHoverBrush">#D6E8FF</SolidColorBrush>
+            <SolidColorBrush x:Key="ProgressFillBrush">#D6E8FF</SolidColorBrush>
+            <SolidColorBrush x:Key="PendingBrush">#8A8A8A</SolidColorBrush>
+            <SolidColorBrush x:Key="ErrorBrush">#D13438</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessBrush">#16A34A</SolidColorBrush>
+            <SolidColorBrush x:Key="ConvertingBrush">#D9A300</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentButtonBrush">#0078D4</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentButtonHoverBrush">#006CBE</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessButtonBrush">#2E7D32</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessButtonHoverBrush">#276B2B</SolidColorBrush>
+            <SolidColorBrush x:Key="ActionButtonTextBrush">#FFFFFF</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="WindowBackgroundBrush">#131824</SolidColorBrush>
+            <SolidColorBrush x:Key="CardBackgroundBrush">#1E2635</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryTextBrush">#EDF1FA</SolidColorBrush>
+            <SolidColorBrush x:Key="SecondaryTextBrush">#B0BCD2</SolidColorBrush>
+            <SolidColorBrush x:Key="BodyTextBrush">#D0D8E8</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderIconBrush">#B0BCD2</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderHoverBrush">#2B3547</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedBrush">#223D59</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedBorderBrush">#528FC3</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedForegroundBrush">#84CAFF</SolidColorBrush>
+            <SolidColorBrush x:Key="FolderSelectedHoverBrush">#2B4B6B</SolidColorBrush>
+            <SolidColorBrush x:Key="ProgressFillBrush">#2B4B6B</SolidColorBrush>
+            <SolidColorBrush x:Key="PendingBrush">#A5B0C2</SolidColorBrush>
+            <SolidColorBrush x:Key="ErrorBrush">#FFABB9</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessBrush">#6DDC91</SolidColorBrush>
+            <SolidColorBrush x:Key="ConvertingBrush">#F0C75E</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentButtonBrush">#84CAFF</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentButtonHoverBrush">#A8DAFF</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessButtonBrush">#81C784</SolidColorBrush>
+            <SolidColorBrush x:Key="SuccessButtonHoverBrush">#A5D6A7</SolidColorBrush>
+            <SolidColorBrush x:Key="ActionButtonTextBrush">#131824</SolidColorBrush>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

@@ -17,7 +17,7 @@
         MinHeight="260"
         MaxWidth="360"
         MaxHeight="260"
-        Background="#E5E7EB">
+        Background="{DynamicResource WindowBackgroundBrush}">
 
     <Window.Styles>
         <Style Selector="Button.output-folder">
@@ -27,18 +27,18 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#667085"/>
+            <Setter Property="Foreground" Value="{DynamicResource FolderIconBrush}"/>
         </Style>
         <Style Selector="Button.output-folder:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#F2F4F7"/>
+            <Setter Property="Background" Value="{DynamicResource FolderHoverBrush}"/>
         </Style>
         <Style Selector="Button.output-folder.selected">
-            <Setter Property="Background" Value="#E8F3FC"/>
-            <Setter Property="BorderBrush" Value="#84CAFF"/>
-            <Setter Property="Foreground" Value="#0078D4"/>
+            <Setter Property="Background" Value="{DynamicResource FolderSelectedBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource FolderSelectedBorderBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource FolderSelectedForegroundBrush}"/>
         </Style>
         <Style Selector="Button.output-folder.selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#D6E8FF"/>
+            <Setter Property="Background" Value="{DynamicResource FolderSelectedHoverBrush}"/>
         </Style>
     </Window.Styles>
 
@@ -50,7 +50,7 @@
             VerticalAlignment="Center"
             Width="320"
             Padding="22"
-            Background="#FFFFFF"
+            Background="{DynamicResource CardBackgroundBrush}"
             CornerRadius="12"
             BoxShadow="0 4 16 0 #15000000">
         <Grid RowDefinitions="Auto,92,Auto"
@@ -59,7 +59,7 @@
                        Text="JXR to Ultra HDR"
                        FontSize="21"
                        FontWeight="SemiBold"
-                       Foreground="#101828"/>
+                       Foreground="{DynamicResource PrimaryTextBrush}"/>
 
             <Grid Grid.Row="1">
                 <Grid ColumnDefinitions="Auto,*,Auto"
@@ -68,7 +68,7 @@
                       IsVisible="{Binding Summary, Converter={x:Static converters:StringConverters.IsNullOrEmpty}}">
                     <TextBlock Text="Quality"
                                VerticalAlignment="Center"
-                               Foreground="#475467"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <Slider Grid.Column="1"
                             Minimum="1"
                             Maximum="100"
@@ -81,7 +81,7 @@
                     <TextBlock Grid.Column="2"
                                Text="{Binding QualityText}"
                                Width="28"
-                               Foreground="#344054"
+                               Foreground="{DynamicResource BodyTextBrush}"
                                VerticalAlignment="Center"/>
                 </Grid>
 
@@ -94,7 +94,7 @@
                             <ProgressBar Minimum="0" Maximum="100"
                                          Value="{Binding Progress}"
                                          Height="26" MinHeight="26"
-                                         Foreground="#D6E8FF" CornerRadius="6"
+                                         Foreground="{DynamicResource ProgressFillBrush}" CornerRadius="6"
                                          IsVisible="{Binding ShowStatusProgress}">
                                 <ProgressBar.Template>
                                     <ControlTemplate>
@@ -114,7 +114,7 @@
                                        IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Pending}}">
                                     <Ellipse Width="8"
                                              Height="8"
-                                             Fill="#8A8A8A"
+                                             Fill="{DynamicResource PendingBrush}"
                                              HorizontalAlignment="Center"
                                              VerticalAlignment="Center"/>
                                 </Panel>
@@ -123,19 +123,19 @@
                                        Height="18"
                                        VerticalAlignment="Center">
                                     <Path Data="M 5,5 L 13,13 M 13,5 L 5,13"
-                                          Stroke="#D13438"
+                                          Stroke="{DynamicResource ErrorBrush}"
                                           StrokeThickness="2"
                                           StrokeLineCap="Round"
                                           Fill="Transparent"
                                           IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Error}}"/>
                                     <Path Data="M 3,9 L 7,13 L 15,5"
-                                          Stroke="#16A34A"
+                                          Stroke="{DynamicResource SuccessBrush}"
                                           StrokeThickness="2.4"
                                           StrokeLineCap="Round"
                                           Fill="Transparent"
                                           IsVisible="{Binding State, Converter={x:Static converters:ObjectConverters.Equal}, ConverterParameter={x:Static vm:ConversionState.Done}}"/>
                                     <Path Data="M 9,2 A 7,7 0 1 1 4.05,4.05"
-                                          Stroke="#D9A300"
+                                          Stroke="{DynamicResource ConvertingBrush}"
                                           StrokeThickness="2"
                                           StrokeLineCap="Round"
                                           Fill="Transparent"
@@ -150,7 +150,7 @@
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding Summary}"
                                            VerticalAlignment="Center"
-                                           Foreground="#344054"
+                                           Foreground="{DynamicResource BodyTextBrush}"
                                            TextWrapping="NoWrap"
                                            TextTrimming="CharacterEllipsis"
                                            ToolTip.Tip="{Binding StatusTip}"/>
@@ -177,7 +177,7 @@
                           ColumnSpacing="10">
                         <TextBlock Text="Quality"
                                    VerticalAlignment="Center"
-                                   Foreground="#475467"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <Slider Grid.Column="1"
                                 Minimum="1"
                                 Maximum="100"
@@ -190,7 +190,7 @@
                         <TextBlock Grid.Column="2"
                                    Text="{Binding QualityText}"
                                    Width="28"
-                                   Foreground="#344054"
+                                   Foreground="{DynamicResource BodyTextBrush}"
                                    VerticalAlignment="Center"/>
                     </Grid>
                 </Grid>

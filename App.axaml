@@ -2,6 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="jxr2uhdr.App"
              RequestedThemeVariant="Default">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://jxr2uhdr/Themes/Palette.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
     <Application.Styles>
         <FluentTheme>
             <FluentTheme.Palettes>
@@ -25,23 +32,33 @@
         </Style>
 
         <Style Selector="Button.accent">
-            <Setter Property="Background" Value="#0078D4"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource AccentButtonBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ActionButtonTextBrush}"/>
         </Style>
 
-        <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#006CBE"/>
-            <Setter Property="Foreground" Value="White"/>
+        <Style Selector="Button.accent:not(:disabled) /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentButtonBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ActionButtonTextBrush}"/>
+        </Style>
+
+        <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.accent:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentButtonHoverBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ActionButtonTextBrush}"/>
         </Style>
 
         <Style Selector="Button.success">
-            <Setter Property="Background" Value="#2E7D32"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{DynamicResource SuccessButtonBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ActionButtonTextBrush}"/>
         </Style>
 
-        <Style Selector="Button.success:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="#276B2B"/>
-            <Setter Property="Foreground" Value="White"/>
+        <Style Selector="Button.success:not(:disabled) /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SuccessButtonBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ActionButtonTextBrush}"/>
+        </Style>
+
+        <Style Selector="Button.success:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.success:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SuccessButtonHoverBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ActionButtonTextBrush}"/>
         </Style>
 
         <Style Selector="TextBlock">
