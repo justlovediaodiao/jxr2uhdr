@@ -40,6 +40,7 @@ public partial class MainWindowViewModel : ObservableObject
     private double _spinnerAngle;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusTip))]
     private string _summary = string.Empty;
 
     [ObservableProperty]
@@ -50,6 +51,14 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ConversionState _state = ConversionState.Pending;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatusTip))]
+    private string _errorDetails = string.Empty;
+
+    public string StatusTip => State == ConversionState.Error && !string.IsNullOrEmpty(ErrorDetails)
+        ? ErrorDetails
+        : Summary;
+
     public bool ShowStatusProgress => Progress > 0;
 
     public bool HasOutputDirectory => OutputDirectory is not null;
@@ -58,14 +67,11 @@ public partial class MainWindowViewModel : ObservableObject
         ? "Select output directory"
         : OutputDirectory;
 
-    public double StatusProgressWidth => Math.Clamp(Progress / 100d, 0, 1) * 278d;
-
     public string QualityText => Math.Round(Quality).ToString();
 
     partial void OnProgressChanged(double value)
     {
         OnPropertyChanged(nameof(ShowStatusProgress));
-        OnPropertyChanged(nameof(StatusProgressWidth));
     }
 
     partial void OnQualityChanged(double value)
@@ -75,6 +81,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnStateChanged(ConversionState oldValue, ConversionState newValue)
     {
+        OnPropertyChanged(nameof(StatusTip));
         AddFilesCommand.NotifyCanExecuteChanged();
         ChooseOutputDirectoryCommand.NotifyCanExecuteChanged();
         ConvertCommand.NotifyCanExecuteChanged();
@@ -117,6 +124,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         OutputDirectory = null;
         _files.Clear();
+        ErrorDetails = string.Empty;
         Progress = 0;
         State = ConversionState.Pending;
         Summary = string.Empty;
@@ -171,21 +179,23 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        ErrorDetails = string.Empty;
+        Summary = BuildSelectionSummary();
         State = ConversionState.Converting;
         Progress = 0;
         var quality = Math.Clamp((int)Math.Round(Quality), 1, 100);
         var maxParallelism = Math.Min(GetMaxParallelism(items.Count), items.Count);
         var completed = 0;
         var succeeded = 0;
+        var failures = new List<string>();
 
         if (maxParallelism == 1)
         {
             foreach (var item in items)
             {
-                if (await ConvertItemAsync(item, quality))
-                {
-                    succeeded++;
-                }
+                var error = await ConvertItemAsync(item, quality);
+                if (error is null) succeeded++;
+                else failures.Add(error);
 
                 completed++;
                 Progress = completed * 100d / items.Count;
@@ -203,10 +213,9 @@ public partial class MainWindowViewModel : ObservableObject
                 var finishedTask = await Task.WhenAny(tasks);
                 tasks.Remove(finishedTask);
 
-                if (await finishedTask)
-                {
-                    succeeded++;
-                }
+                var error = await finishedTask;
+                if (error is null) succeeded++;
+                else failures.Add(error);
 
                 completed++;
                 Progress = completed * 100d / items.Count;
@@ -219,6 +228,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         else
         {
+            ErrorDetails = string.Join("\n\n", failures);
             Summary = BuildFailureSummary(items.Count, succeeded);
             State = ConversionState.Error;
         }
@@ -309,7 +319,7 @@ public partial class MainWindowViewModel : ObservableObject
         return null;
     }
 
-    private static async Task<bool> ConvertItemAsync(FileItemViewModel item, int quality)
+    private static async Task<string?> ConvertItemAsync(FileItemViewModel item, int quality)
     {
         try
         {
@@ -319,15 +329,27 @@ public partial class MainWindowViewModel : ObservableObject
                 quality,
                 item.OutputPath));
 
-            return result == 0;
+            return result == 0 ? null : $"{item.OriginalName}: {DescribeError(result)} (error {result}).";
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return $"{item.OriginalName}: {ex.Message}";
         }
     }
 
-    private static async Task<bool> ConvertItemWithLimitAsync(
+    private static string DescribeError(int result) => result switch
+    {
+        1 => "Invalid conversion arguments",
+        2 => "Failed to initialize Windows imaging components (COM)",
+        3 => "Failed to read or decode the input image using Windows Imaging Component",
+        4 => "Failed to write the output image; check the output directory and permissions",
+        5 => "Not enough memory to convert the image",
+        6 => "Ultra HDR encoding failed",
+        7 => "The input image pixel format is not supported",
+        _ => "Native image conversion failed"
+    };
+
+    private static async Task<string?> ConvertItemWithLimitAsync(
         SemaphoreSlim semaphore,
         FileItemViewModel item,
         int quality)
